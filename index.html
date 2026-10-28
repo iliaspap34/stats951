@@ -1,129 +1,234 @@
-<!-- ============================================================
-     City4All — Ζωντανά στατιστικά (compact, χωρίς κουτί)
-     ΔΕΝ χρειάζεται καμία αλλαγή στον worker.
-     Χρησιμοποιεί τα ΥΠΑΡΧΟΝΤΑ endpoints: POST /search + GET /locations
-     (14 μικρά αιτήματα, ~2KB το καθένα, cache 24h στο browser).
 
-     ΣΗΜΕΙΩΣΗ ΤΥΠΟΓΡΑΦΙΑΣ: τα κεφαλαία γράφονται ΧΩΡΙΣ τόνους,
-     όπως επιβάλλει η ελληνική τυπογραφία: χωρίς τόνο στα κεφαλαία.
+<!-- ============================================================
+     City4All — Ζωντανά στατιστικά
+     Styling εναρμονισμένο με την υπόλοιπη ιστοσελίδα.
+     Διατηρούνται τα υπάρχοντα endpoints και η λειτουργία.
      ============================================================ -->
 
 <style>
-  .c4a-stats{
-    --c4a-blue:#27A6F5;
-    --c4a-green:#4ADE80;
-    --c4a-mint:#86C99E;
-    --c4a-text:#F1F5F9;
-    --c4a-dim:rgba(241,245,249,.60);
-    --c4a-line:rgba(255,255,255,.08);
+  .c4a-stats {
+    --c4a-blue: #0079c1;
+    --c4a-green: #247647;
+    --c4a-mint: #86c99e;
+    --c4a-text: #172b3a;
+    --c4a-dim: #5c6c75;
+    --c4a-line: #e0e9e3;
 
-    box-sizing:border-box;
-    width:100%;
-    max-width:980px;
-    margin:0 auto;
-    padding:0;
-    background:none;
-    border:0;
-    border-radius:0;
-    font-family:'Montserrat','Segoe UI',Roboto,sans-serif;
-    color:var(--c4a-text);
-    -webkit-font-smoothing:antialiased;
-  }
-  .c4a-stats *{box-sizing:border-box}
-
-  /* --- κεφαλίδα --- */
-  .c4a-top{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin-bottom:18px;
-  }
-  .c4a-live{
-    display:inline-flex; align-items:center; gap:9px;
-    font-size:10.5px; font-weight:700; letter-spacing:1.4px;
-    color:var(--c4a-dim);
-  }
-  .c4a-dot{
-    width:7px; height:7px; border-radius:50%;
-    background:var(--c4a-green); flex:0 0 auto;
-    box-shadow:0 0 0 3px rgba(74,222,128,.16);
-    animation:c4aPulse 2.6s ease-in-out infinite;
-  }
-  .c4a-dot.is-off{ background:#64748B; box-shadow:0 0 0 3px rgba(100,116,139,.16); animation:none }
-  @keyframes c4aPulse{
-    0%,100%{ box-shadow:0 0 0 3px rgba(74,222,128,.16) }
-    50%{ box-shadow:0 0 0 6px rgba(74,222,128,.05) }
-  }
-  .c4a-top-note{ font-size:10.5px; color:var(--c4a-dim); letter-spacing:.3px }
-
-  /* --- μετρήσεις: ανοιχτές, χωρίς διαχωριστικά --- */
-  .c4a-grid{
-    display:grid;
-    grid-template-columns:repeat(4, minmax(0,1fr));
-    gap:clamp(16px, 3vw, 34px);
-  }
-  .c4a-item{ min-width:0 }
-
-  .c4a-num{
-    display:block;
-    font-size:clamp(1.65rem, 3.7vw, 2.35rem);
-    font-weight:800; line-height:1.02; letter-spacing:-.8px;
-    color:var(--c4a-blue);
-    font-variant-numeric:tabular-nums;
-    font-feature-settings:"tnum" 1;
-  }
-  .c4a-item:nth-child(2) .c4a-num{ color:#5CB8F8 }
-  .c4a-item:nth-child(3) .c4a-num{ color:var(--c4a-mint) }
-  .c4a-item:nth-child(4) .c4a-num{ color:var(--c4a-green) }
-
-  .c4a-lbl{
-    display:block; margin-top:8px;
-    font-size:10.5px; font-weight:700; letter-spacing:1.3px;
-    color:var(--c4a-dim);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .c4a-sub{
-    display:block; margin-top:3px; font-size:10.5px;
-    color:rgba(241,245,249,.38);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--c4a-text);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* --- μίνι μπάρες --- */
-  .c4a-bars{
-    display:grid; gap:clamp(10px, 2vw, 22px);
-    grid-template-columns:repeat(3, minmax(0,1fr));
-    margin-top:26px;
-  }
-  .c4a-bar-row{ min-width:0 }
-  .c4a-bar-head{
-    display:flex; justify-content:space-between; gap:8px;
-    font-size:10.5px; margin-bottom:6px; color:var(--c4a-dim);
-  }
-  .c4a-bar-head span:first-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-  .c4a-bar-head b{ color:var(--c4a-text); font-weight:700; font-variant-numeric:tabular-nums }
-  .c4a-track{ height:4px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08) }
-  .c4a-fill{
-    height:100%; width:0; border-radius:999px;
-    background:linear-gradient(90deg,var(--c4a-blue),var(--c4a-green));
-    transition:width 1.15s cubic-bezier(.22,.8,.25,1);
+  .c4a-stats * {
+    box-sizing: border-box;
   }
 
-  @media (max-width:640px){
-    .c4a-grid{ grid-template-columns:1fr 1fr; gap:20px 18px }
-    .c4a-bars{ grid-template-columns:1fr; gap:10px; margin-top:22px }
-    .c4a-bar-row:nth-child(n+2){ display:none }
-    .c4a-top{ margin-bottom:16px }
-    .c4a-top-note{ display:none }
-    .c4a-num{ font-size:1.9rem }
+  /* Κεφαλίδα */
+
+  .c4a-stats .c4a-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .c4a-dot{ animation:none }
-    .c4a-fill{ transition:none }
+  .c4a-stats .c4a-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--c4a-dim);
+    letter-spacing: 0.7px;
+  }
+
+  .c4a-stats .c4a-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c4a-green);
+    flex: 0 0 auto;
+    box-shadow: 0 0 0 3px rgba(36, 118, 71, 0.12);
+    animation: c4aPulse 2.6s ease-in-out infinite;
+  }
+
+  .c4a-stats .c4a-dot.is-off {
+    background: #8b989e;
+    box-shadow: 0 0 0 3px rgba(139, 152, 158, 0.12);
+    animation: none;
+  }
+
+  @keyframes c4aPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 3px rgba(36, 118, 71, 0.12);
+    }
+
+    50% {
+      box-shadow: 0 0 0 6px rgba(36, 118, 71, 0.04);
+    }
+  }
+
+  .c4a-stats .c4a-top-note {
+    color: var(--c4a-dim);
+    letter-spacing: 0.2px;
+  }
+
+  /* Στατιστικά */
+
+  .c4a-stats .c4a-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(16px, 3vw, 34px);
+  }
+
+  .c4a-stats .c4a-item {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .c4a-stats .c4a-num {
+    display: block;
+    color: var(--c4a-green);
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .c4a-stats .c4a-item:nth-child(2) .c4a-num {
+    color: var(--c4a-blue);
+  }
+
+  .c4a-stats .c4a-item:nth-child(3) .c4a-num {
+    color: var(--c4a-green);
+  }
+
+  .c4a-stats .c4a-item:nth-child(4) .c4a-num {
+    color: var(--c4a-text);
+  }
+
+  .c4a-stats .c4a-lbl {
+    display: block;
+    margin-top: 8px;
+    color: var(--c4a-text);
+    letter-spacing: 0.65px;
+    overflow-wrap: anywhere;
+  }
+
+  .c4a-stats .c4a-sub {
+    display: block;
+    margin-top: 4px;
+    color: var(--c4a-dim);
+    overflow-wrap: anywhere;
+  }
+
+  /* Μίνι μπάρες */
+
+  .c4a-stats .c4a-bars {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 24px);
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--c4a-line);
+  }
+
+  .c4a-stats .c4a-bar-row {
+    min-width: 0;
+  }
+
+  .c4a-stats .c4a-bar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--c4a-dim);
+  }
+
+  .c4a-stats .c4a-bar-head span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .c4a-stats .c4a-bar-head b {
+    flex: 0 0 auto;
+    color: var(--c4a-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .c4a-stats .c4a-track {
+    height: 5px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #e8eee9;
+  }
+
+  .c4a-stats .c4a-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--c4a-green),
+      var(--c4a-mint)
+    );
+    transition: width 1.15s cubic-bezier(.22, .8, .25, 1);
+  }
+
+  /* Κινητά */
+
+  @media (max-width: 640px) {
+    .c4a-stats .c4a-top {
+      margin-bottom: 20px;
+    }
+
+    .c4a-stats .c4a-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px 18px;
+    }
+
+    .c4a-stats .c4a-bars {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 24px;
+      padding-top: 16px;
+    }
+
+    .c4a-stats .c4a-bar-row:nth-child(n+2) {
+      display: none;
+    }
+
+    .c4a-stats .c4a-top-note {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .c4a-stats .c4a-dot {
+      animation: none;
+    }
+
+    .c4a-stats .c4a-fill {
+      transition: none;
+    }
   }
 </style>
 
 <section class="c4a-stats" id="c4aStats" role="group" aria-label="Στατιστικά δεδομένων City4All">
   <div class="c4a-top">
-    <span class="c4a-live"><span class="c4a-dot" id="c4aDot" aria-hidden="true"></span><span id="c4aStatus">ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ</span></span>
+    <span class="c4a-live">
+      <span class="c4a-dot" id="c4aDot" aria-hidden="true"></span>
+      <span id="c4aStatus">ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ</span>
+    </span>
     <span class="c4a-top-note" id="c4aUpdated">Ενημέρωση…</span>
   </div>
 
@@ -133,16 +238,19 @@
       <span class="c4a-lbl">ΣΗΜΕΙΑ</span>
       <span class="c4a-sub">καταγεγραμμένα</span>
     </div>
+
     <div class="c4a-item">
       <span class="c4a-num" data-c4a-num="areas">0</span>
       <span class="c4a-lbl">ΠΕΡΙΟΧΕΣ</span>
       <span class="c4a-sub" id="c4aAreasSub">δήμοι · περιφέρειες</span>
     </div>
+
     <div class="c4a-item">
       <span class="c4a-num" data-c4a-num="accessRecords">0</span>
       <span class="c4a-lbl">ΚΑΤΑΓΡΑΦΕΣ</span>
       <span class="c4a-sub">μέσων πρόσβασης</span>
     </div>
+
     <div class="c4a-item">
       <span class="c4a-num" data-c4a-num="wc">0</span>
       <span class="c4a-lbl">ΤΟΥΑΛΕΤΕΣ ΑΜΕΑ</span>
@@ -156,6 +264,7 @@
 <script>
 (function () {
   "use strict";
+
   var API = "https://city4allfinalai.ilias-pap-net.workers.dev";
   var KEY = "c4a_stats_v3";
   var TTL = 24 * 60 * 60 * 1000;
@@ -164,6 +273,7 @@
   if (!root) return;
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   var el = {
     dot: document.getElementById("c4aDot"),
     status: document.getElementById("c4aStatus"),
@@ -172,7 +282,6 @@
     bars: document.getElementById("c4aBars")
   };
 
-  /* Κεφαλαία ΧΩΡΙΣ τόνους (ελληνική τυπογραφία) */
   var TXT = {
     live: "ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ",
     partial: "ΜΕΡΙΚΑ ΔΕΔΟΜΕΝΑ",
@@ -195,44 +304,89 @@
   ];
 
   var DEFAULT_DATA = {
-    total: 951, areas: 206, dimoi: 109, periferies: 13,
-    counts: { ramp: 707, stepfree: 328, parking: 285, wc: 171, elevator: 146, signage: 108, autodoor: 69, handrail: 48, tactile: 16, doorbutton: 7 },
+    total: 951,
+    areas: 206,
+    dimoi: 109,
+    periferies: 13,
+    counts: {
+      ramp: 707,
+      stepfree: 328,
+      parking: 285,
+      wc: 171,
+      elevator: 146,
+      signage: 108,
+      autodoor: 69,
+      handrail: 48,
+      tactile: 16,
+      doorbutton: 7
+    },
     at: 0
   };
 
-  function fmt(n) { return Number(n || 0).toLocaleString("el-GR"); }
+  function fmt(n) {
+    return Number(n || 0).toLocaleString("el-GR");
+  }
 
-  /* «Γύρισμα» αριθμών: ξεκινά ΠΑΝΤΑ από 0 την πρώτη φορά,
-     ώστε η κίνηση να φαίνεται ακόμη κι όταν τα νούμερα είναι ίδια. */
   function roll(node, to, from) {
     var target = Number(to) || 0;
-    var start = typeof from === "number" ? from : (parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0);
+    var start = typeof from === "number"
+      ? from
+      : (parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0);
+
     node.setAttribute("aria-label", fmt(target));
-    if (reduce || start === target) { node.textContent = fmt(target); return; }
-    var t0 = performance.now(), dur = 1250;
+
+    if (reduce || start === target) {
+      node.textContent = fmt(target);
+      return;
+    }
+
+    var t0 = performance.now();
+    var dur = 1250;
+
     (function tick(now) {
       var p = Math.min(1, (now - t0) / dur);
       var e = 1 - Math.pow(1 - p, 3);
+
       node.textContent = fmt(Math.round(start + (target - start) * e));
+
       if (p < 1) requestAnimationFrame(tick);
     })(t0);
   }
 
   var barEls = null;
+
   function buildBars() {
     if (!el.bars || barEls) return;
+
     el.bars.innerHTML = "";
+
     barEls = FEATURES.slice(0, 3).map(function (f) {
-      var row = document.createElement("div"); row.className = "c4a-bar-row";
-      var head = document.createElement("div"); head.className = "c4a-bar-head";
-      var nm = document.createElement("span"); nm.textContent = f.label;
-      var vl = document.createElement("b"); vl.textContent = "—";
-      head.appendChild(nm); head.appendChild(vl);
-      var track = document.createElement("div"); track.className = "c4a-track";
-      var fill = document.createElement("div"); fill.className = "c4a-fill";
+      var row = document.createElement("div");
+      row.className = "c4a-bar-row";
+
+      var head = document.createElement("div");
+      head.className = "c4a-bar-head";
+
+      var nm = document.createElement("span");
+      nm.textContent = f.label;
+
+      var vl = document.createElement("b");
+      vl.textContent = "—";
+
+      head.appendChild(nm);
+      head.appendChild(vl);
+
+      var track = document.createElement("div");
+      track.className = "c4a-track";
+
+      var fill = document.createElement("div");
+      fill.className = "c4a-fill";
+
       track.appendChild(fill);
-      row.appendChild(head); row.appendChild(track);
+      row.appendChild(head);
+      row.appendChild(track);
       el.bars.appendChild(row);
+
       return { val: vl, fill: fill };
     });
   }
@@ -241,39 +395,69 @@
 
   function paint(d) {
     var sum = 0;
-    for (var k in d.counts) sum += d.counts[k] || 0;
 
-    var nums = { total: d.total, areas: d.areas, accessRecords: sum, wc: d.counts.wc };
+    for (var k in d.counts) {
+      sum += d.counts[k] || 0;
+    }
+
+    var nums = {
+      total: d.total,
+      areas: d.areas,
+      accessRecords: sum,
+      wc: d.counts.wc
+    };
+
     var fromZero = firstPaint ? 0 : undefined;
 
     Object.keys(nums).forEach(function (key) {
       var node = root.querySelector('[data-c4a-num="' + key + '"]');
-      if (node && typeof nums[key] === "number" && nums[key] > 0) roll(node, nums[key], fromZero);
+
+      if (node && typeof nums[key] === "number" && nums[key] > 0) {
+        roll(node, nums[key], fromZero);
+      }
     });
+
     firstPaint = false;
 
     if (el.areasSub) {
-      el.areasSub.textContent = fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
+      el.areasSub.textContent =
+        fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
     }
 
     buildBars();
+
     if (barEls) {
       var max = Math.max(d.counts[FEATURES[0].id] || 1, 1);
+
       barEls.forEach(function (b, i) {
         var f = FEATURES[i];
         var n = d.counts[f.id] || 0;
         var pct = Math.round((n / Math.max(d.total, 1)) * 100);
-        b.val.textContent = pct + "%";
         var w = Math.max(2, Math.min(100, Math.round((n / max) * 100))) + "%";
-        if (reduce) b.fill.style.width = w;
-        else setTimeout(function () { b.fill.style.width = w; }, 420 + i * 130);
+
+        b.val.textContent = pct + "%";
+
+        if (reduce) {
+          b.fill.style.width = w;
+        } else {
+          setTimeout(function () {
+            b.fill.style.width = w;
+          }, 420 + i * 130);
+        }
       });
     }
 
     if (el.updated && d.at) {
       try {
-        el.updated.textContent = TXT.update + " " + new Date(d.at).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
-      } catch (e) { /* */ }
+        el.updated.textContent =
+          TXT.update + " " +
+          new Date(d.at).toLocaleTimeString("el-GR", {
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+      } catch (e) {
+        /* */
+      }
     }
   }
 
@@ -281,37 +465,58 @@
     try {
       var c = JSON.parse(localStorage.getItem(KEY) || "null");
       if (c && c.counts && c.total) return c;
-    } catch (e) { /* */ }
+    } catch (e) {
+      /* */
+    }
+
     return null;
   }
 
   function runLimited(tasks, limit) {
     var results = [];
-    var i = 0, active = 0, done = 0;
+    var i = 0;
+    var active = 0;
+    var done = 0;
+
     return new Promise(function (resolve) {
       if (!tasks.length) return resolve(results);
+
       function next() {
         while (active < limit && i < tasks.length) {
           (function (idx) {
             active++;
-            tasks[idx]().then(function (v) { results[idx] = v; })
-              .catch(function () { results[idx] = null; })
+
+            tasks[idx]()
+              .then(function (v) {
+                results[idx] = v;
+              })
+              .catch(function () {
+                results[idx] = null;
+              })
               .then(function () {
-                active--; done++;
+                active--;
+                done++;
+
                 if (done === tasks.length) resolve(results);
                 else next();
               });
           })(i++);
         }
       }
+
       next();
     });
   }
 
   function withTimeout(promise, ms) {
     var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, ms);
-    return promise(ctrl.signal).finally(function () { clearTimeout(timer); });
+    var timer = setTimeout(function () {
+      ctrl.abort();
+    }, ms);
+
+    return promise(ctrl.signal).finally(function () {
+      clearTimeout(timer);
+    });
   }
 
   function postTotal(body) {
@@ -322,9 +527,14 @@
         body: JSON.stringify(Object.assign({ pageSize: 1 }, body || {})),
         signal: signal
       })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r.json();
+        })
         .then(function (d) {
-          if (d && d.success && typeof d.total === "number") return d.total;
+          if (d && d.success && typeof d.total === "number") {
+            return d.total;
+          }
+
           throw new Error("bad");
         });
     }, 12000);
@@ -332,41 +542,73 @@
 
   function getValues(level) {
     return withTimeout(function (signal) {
-      return fetch(API + "/locations?level=" + level, { signal: signal })
-        .then(function (r) { return r.json(); })
-        .then(function (d) { return (d && d.values) || []; });
+      return fetch(API + "/locations?level=" + level, {
+        signal: signal
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (d) {
+          return (d && d.values) || [];
+        });
     }, 12000);
   }
 
   function strip(s) {
-    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    return String(s || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
   function uniqCount(list) {
-    var seen = Object.create(null), n = 0;
+    var seen = Object.create(null);
+    var n = 0;
+
     for (var i = 0; i < list.length; i++) {
       var k = strip(list[i]);
+
       if (!k) continue;
-      if (!seen[k]) { seen[k] = 1; n++; }
+
+      if (!seen[k]) {
+        seen[k] = 1;
+        n++;
+      }
     }
+
     return n;
   }
 
   function refresh() {
     var tasks = [
-      function () { return postTotal({}); },
-      function () { return getValues("area"); },
-      function () { return getValues("dimos"); },
-      function () { return getValues("perifereia"); }
+      function () {
+        return postTotal({});
+      },
+      function () {
+        return getValues("area");
+      },
+      function () {
+        return getValues("dimos");
+      },
+      function () {
+        return getValues("perifereia");
+      }
     ];
 
     FEATURES.forEach(function (f) {
-      tasks.push(function () { return postTotal({ accessibility: [f.id] }); });
+      tasks.push(function () {
+        return postTotal({ accessibility: [f.id] });
+      });
     });
 
     return runLimited(tasks, 4).then(function (res) {
       var total = res[0];
-      if (typeof total !== "number") throw new Error("total missing");
+
+      if (typeof total !== "number") {
+        throw new Error("total missing");
+      }
 
       var data = {
         total: total,
@@ -379,30 +621,62 @@
       };
 
       var ok = 0;
+
       FEATURES.forEach(function (f, i) {
         var v = res[4 + i];
-        if (typeof v === "number") { data.counts[f.id] = v; ok++; }
+
+        if (typeof v === "number") {
+          data.counts[f.id] = v;
+          ok++;
+        }
       });
+
       data.partial = ok < FEATURES.length;
 
       paint(data);
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* */ }
 
-      if (el.dot) el.dot.className = data.partial ? "c4a-dot is-off" : "c4a-dot";
-      if (el.status) el.status.textContent = data.partial ? TXT.partial : TXT.live;
+      try {
+        localStorage.setItem(KEY, JSON.stringify(data));
+      } catch (e) {
+        /* */
+      }
+
+      if (el.dot) {
+        el.dot.className = data.partial ? "c4a-dot is-off" : "c4a-dot";
+      }
+
+      if (el.status) {
+        el.status.textContent = data.partial ? TXT.partial : TXT.live;
+      }
+
       return data;
     });
   }
 
-  /* 1) Άμεση εμφάνιση: cache ή προεπιλογές — με «γύρισμα» από το 0 */
-  var cached = readCache();
-  paint(cached && (Date.now() - cached.at) < TTL ? cached : Object.assign({}, DEFAULT_DATA, { at: 0 }));
+  /* Άμεση εμφάνιση από cache ή προεπιλεγμένα δεδομένα */
 
-  /* 2) Φρέσκα δεδομένα */
+  var cached = readCache();
+
+  paint(
+    cached && (Date.now() - cached.at) < TTL
+      ? cached
+      : Object.assign({}, DEFAULT_DATA, { at: 0 })
+  );
+
+  /* Φόρτωση ενημερωμένων δεδομένων */
+
   refresh().catch(function () {
-    if (el.dot) el.dot.className = "c4a-dot is-off";
-    if (el.status) el.status.textContent = TXT.stale;
-    if (el.updated) el.updated.textContent = TXT.offline;
+    if (el.dot) {
+      el.dot.className = "c4a-dot is-off";
+    }
+
+    if (el.status) {
+      el.status.textContent = TXT.stale;
+    }
+
+    if (el.updated) {
+      el.updated.textContent = TXT.offline;
+    }
   });
 })();
 </script>
