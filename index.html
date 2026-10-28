@@ -1,9 +1,11 @@
 <!-- ============================================================
-     City4All — Ζωντανά στατιστικά (compact)
+     City4All — Ζωντανά στατιστικά (compact, χωρίς κουτί)
      ΔΕΝ χρειάζεται καμία αλλαγή στον worker.
      Χρησιμοποιεί τα ΥΠΑΡΧΟΝΤΑ endpoints: POST /search + GET /locations
-     (14 μικρά αιτήματα, ~1.6-3KB το καθένα, cache 24h στο browser).
-     Επικόλλησέ το ως ένα block.
+     (14 μικρά αιτήματα, ~2KB το καθένα, cache 24h στο browser).
+
+     ΣΗΜΕΙΩΣΗ ΤΥΠΟΓΡΑΦΙΑΣ: τα κεφαλαία γράφονται ΧΩΡΙΣ τόνους,
+     όπως επιβάλλει η ελληνική τυπογραφία: χωρίς τόνο στα κεφαλαία.
      ============================================================ -->
 
 <style>
@@ -12,35 +14,32 @@
     --c4a-green:#4ADE80;
     --c4a-mint:#86C99E;
     --c4a-text:#F1F5F9;
-    --c4a-dim:rgba(241,245,249,.62);
-    --c4a-line:rgba(255,255,255,.10);
-    --c4a-surface:rgba(255,255,255,.035);
+    --c4a-dim:rgba(241,245,249,.60);
+    --c4a-line:rgba(255,255,255,.08);
 
     box-sizing:border-box;
     width:100%;
     max-width:980px;
     margin:0 auto;
-    padding:16px 22px 14px;
-    border:1px solid var(--c4a-line);
-    border-radius:18px;
-    background:
-      radial-gradient(600px 200px at 0% 0%, rgba(39,166,245,.10), rgba(39,166,245,0) 65%),
-      radial-gradient(520px 200px at 100% 0%, rgba(74,222,128,.07), rgba(74,222,128,0) 65%),
-      var(--c4a-surface);
+    padding:0;
+    background:none;
+    border:0;
+    border-radius:0;
     font-family:'Montserrat','Segoe UI',Roboto,sans-serif;
     color:var(--c4a-text);
     -webkit-font-smoothing:antialiased;
   }
   .c4a-stats *{box-sizing:border-box}
 
+  /* --- κεφαλίδα --- */
   .c4a-top{
     display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin-bottom:14px;
+    gap:12px; margin-bottom:18px;
   }
   .c4a-live{
-    display:inline-flex; align-items:center; gap:8px;
-    font-size:10.5px; font-weight:700; letter-spacing:1.1px;
-    text-transform:uppercase; color:var(--c4a-dim);
+    display:inline-flex; align-items:center; gap:9px;
+    font-size:10.5px; font-weight:700; letter-spacing:1.4px;
+    color:var(--c4a-dim);
   }
   .c4a-dot{
     width:7px; height:7px; border-radius:50%;
@@ -51,65 +50,69 @@
   .c4a-dot.is-off{ background:#64748B; box-shadow:0 0 0 3px rgba(100,116,139,.16); animation:none }
   @keyframes c4aPulse{
     0%,100%{ box-shadow:0 0 0 3px rgba(74,222,128,.16) }
-    50%{ box-shadow:0 0 0 6px rgba(74,222,128,.06) }
+    50%{ box-shadow:0 0 0 6px rgba(74,222,128,.05) }
   }
   .c4a-top-note{ font-size:10.5px; color:var(--c4a-dim); letter-spacing:.3px }
 
-  .c4a-grid{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)) }
-  .c4a-item{ padding:2px 14px; border-left:1px solid var(--c4a-line); min-width:0 }
-  .c4a-item:first-child{ border-left:0; padding-left:0 }
+  /* --- μετρήσεις: ανοιχτές, χωρίς διαχωριστικά --- */
+  .c4a-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:clamp(16px, 3vw, 34px);
+  }
+  .c4a-item{ min-width:0 }
+
   .c4a-num{
     display:block;
-    font-size:clamp(1.45rem, 3.2vw, 2.05rem);
-    font-weight:800; line-height:1.05; letter-spacing:-.5px;
+    font-size:clamp(1.65rem, 3.7vw, 2.35rem);
+    font-weight:800; line-height:1.02; letter-spacing:-.8px;
     color:var(--c4a-blue);
     font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;
   }
   .c4a-item:nth-child(2) .c4a-num{ color:#5CB8F8 }
   .c4a-item:nth-child(3) .c4a-num{ color:var(--c4a-mint) }
   .c4a-item:nth-child(4) .c4a-num{ color:var(--c4a-green) }
+
   .c4a-lbl{
-    display:block; margin-top:4px;
-    font-size:11px; font-weight:600; letter-spacing:.5px;
-    text-transform:uppercase; color:var(--c4a-dim);
+    display:block; margin-top:8px;
+    font-size:10.5px; font-weight:700; letter-spacing:1.3px;
+    color:var(--c4a-dim);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .c4a-sub{
-    display:block; margin-top:2px; font-size:10.5px;
-    color:rgba(241,245,249,.42); white-space:nowrap;
-    overflow:hidden; text-overflow:ellipsis;
+    display:block; margin-top:3px; font-size:10.5px;
+    color:rgba(241,245,249,.38);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
+  /* --- μίνι μπάρες --- */
   .c4a-bars{
-    display:grid; gap:6px;
+    display:grid; gap:clamp(10px, 2vw, 22px);
     grid-template-columns:repeat(3, minmax(0,1fr));
-    margin-top:13px; padding-top:12px;
-    border-top:1px solid var(--c4a-line);
+    margin-top:26px;
   }
   .c4a-bar-row{ min-width:0 }
   .c4a-bar-head{
     display:flex; justify-content:space-between; gap:8px;
-    font-size:10.5px; margin-bottom:5px; color:var(--c4a-dim);
+    font-size:10.5px; margin-bottom:6px; color:var(--c4a-dim);
   }
   .c4a-bar-head span:first-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
   .c4a-bar-head b{ color:var(--c4a-text); font-weight:700; font-variant-numeric:tabular-nums }
-  .c4a-track{ height:5px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.09) }
+  .c4a-track{ height:4px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08) }
   .c4a-fill{
     height:100%; width:0; border-radius:999px;
     background:linear-gradient(90deg,var(--c4a-blue),var(--c4a-green));
-    transition:width 1s cubic-bezier(.22,.8,.25,1);
+    transition:width 1.15s cubic-bezier(.22,.8,.25,1);
   }
 
   @media (max-width:640px){
-    .c4a-stats{ padding:15px 16px 14px; border-radius:16px }
-    .c4a-grid{ grid-template-columns:1fr 1fr; gap:14px 0 }
-    .c4a-item{ padding:0 12px }
-    .c4a-item:nth-child(3){ border-left:0; padding-left:0 }
-    .c4a-item:nth-child(odd){ padding-left:0 }
-    .c4a-bars{ grid-template-columns:1fr; gap:8px; margin-top:13px }
+    .c4a-grid{ grid-template-columns:1fr 1fr; gap:20px 18px }
+    .c4a-bars{ grid-template-columns:1fr; gap:10px; margin-top:22px }
     .c4a-bar-row:nth-child(n+2){ display:none }
-    .c4a-top{ margin-bottom:12px }
+    .c4a-top{ margin-bottom:16px }
     .c4a-top-note{ display:none }
+    .c4a-num{ font-size:1.9rem }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -120,29 +123,29 @@
 
 <section class="c4a-stats" id="c4aStats" role="group" aria-label="Στατιστικά δεδομένων City4All">
   <div class="c4a-top">
-    <span class="c4a-live"><span class="c4a-dot" id="c4aDot" aria-hidden="true"></span><span id="c4aStatus">Ζωντανά δεδομένα</span></span>
+    <span class="c4a-live"><span class="c4a-dot" id="c4aDot" aria-hidden="true"></span><span id="c4aStatus">ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ</span></span>
     <span class="c4a-top-note" id="c4aUpdated">Ενημέρωση…</span>
   </div>
 
   <div class="c4a-grid">
     <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="total">951</span>
-      <span class="c4a-lbl">Σημεία</span>
+      <span class="c4a-num" data-c4a-num="total">0</span>
+      <span class="c4a-lbl">ΣΗΜΕΙΑ</span>
       <span class="c4a-sub">καταγεγραμμένα</span>
     </div>
     <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="areas">207</span>
-      <span class="c4a-lbl">Περιοχές</span>
+      <span class="c4a-num" data-c4a-num="areas">0</span>
+      <span class="c4a-lbl">ΠΕΡΙΟΧΕΣ</span>
       <span class="c4a-sub" id="c4aAreasSub">δήμοι · περιφέρειες</span>
     </div>
     <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="accessRecords">1.885</span>
-      <span class="c4a-lbl">Καταγραφές</span>
+      <span class="c4a-num" data-c4a-num="accessRecords">0</span>
+      <span class="c4a-lbl">ΚΑΤΑΓΡΑΦΕΣ</span>
       <span class="c4a-sub">μέσων πρόσβασης</span>
     </div>
     <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="wc">171</span>
-      <span class="c4a-lbl">Τουαλέτες ΑμεΑ</span>
+      <span class="c4a-num" data-c4a-num="wc">0</span>
+      <span class="c4a-lbl">ΤΟΥΑΛΕΤΕΣ ΑΜΕΑ</span>
       <span class="c4a-sub">η μεγαλύτερη έλλειψη</span>
     </div>
   </div>
@@ -154,8 +157,9 @@
 (function () {
   "use strict";
   var API = "https://city4allfinalai.ilias-pap-net.workers.dev";
-  var KEY = "c4a_stats_v2";
-  var TTL = 24 * 60 * 60 * 1000; // 24 ώρες
+  var KEY = "c4a_stats_v3";
+  var TTL = 24 * 60 * 60 * 1000;
+
   var root = document.getElementById("c4aStats");
   if (!root) return;
 
@@ -168,7 +172,15 @@
     bars: document.getElementById("c4aBars")
   };
 
-  /* Τα 10 μέσα — ids όπως τα επιστρέφει το /fields */
+  /* Κεφαλαία ΧΩΡΙΣ τόνους (ελληνική τυπογραφία) */
+  var TXT = {
+    live: "ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ",
+    partial: "ΜΕΡΙΚΑ ΔΕΔΟΜΕΝΑ",
+    stale: "ΤΕΛΕΥΤΑΙΑ ΕΝΗΜΕΡΩΣΗ",
+    update: "ΕΝΗΜΕΡΩΣΗ",
+    offline: "ΠΡΟΣΩΡΙΝΑ OFFLINE"
+  };
+
   var FEATURES = [
     { id: "ramp", label: "Ράμπα" },
     { id: "stepfree", label: "Είσοδος χωρίς σκαλοπάτια" },
@@ -182,25 +194,26 @@
     { id: "doorbutton", label: "Κουμπί εισόδου" }
   ];
 
-  /* Τελευταία γνωστά (χρησιμοποιούνται μέχρι να έρθουν φρέσκα) */
   var DEFAULT_DATA = {
-    total: 951, areas: 207, dimoi: 109, periferies: 13,
+    total: 951, areas: 206, dimoi: 109, periferies: 13,
     counts: { ramp: 707, stepfree: 328, parking: 285, wc: 171, elevator: 146, signage: 108, autodoor: 69, handrail: 48, tactile: 16, doorbutton: 7 },
     at: 0
   };
 
   function fmt(n) { return Number(n || 0).toLocaleString("el-GR"); }
 
-  function countUp(node, to) {
+  /* «Γύρισμα» αριθμών: ξεκινά ΠΑΝΤΑ από 0 την πρώτη φορά,
+     ώστε η κίνηση να φαίνεται ακόμη κι όταν τα νούμερα είναι ίδια. */
+  function roll(node, to, from) {
     var target = Number(to) || 0;
-    var from = parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0;
+    var start = typeof from === "number" ? from : (parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0);
     node.setAttribute("aria-label", fmt(target));
-    if (reduce || from === target) { node.textContent = fmt(target); return; }
-    var t0 = performance.now(), dur = 900;
+    if (reduce || start === target) { node.textContent = fmt(target); return; }
+    var t0 = performance.now(), dur = 1250;
     (function tick(now) {
       var p = Math.min(1, (now - t0) / dur);
       var e = 1 - Math.pow(1 - p, 3);
-      node.textContent = fmt(Math.round(from + (target - from) * e));
+      node.textContent = fmt(Math.round(start + (target - start) * e));
       if (p < 1) requestAnimationFrame(tick);
     })(t0);
   }
@@ -224,16 +237,20 @@
     });
   }
 
+  var firstPaint = true;
+
   function paint(d) {
-    var nums = { total: d.total, areas: d.areas, accessRecords: 0, wc: d.counts.wc };
     var sum = 0;
     for (var k in d.counts) sum += d.counts[k] || 0;
-    nums.accessRecords = sum;
+
+    var nums = { total: d.total, areas: d.areas, accessRecords: sum, wc: d.counts.wc };
+    var fromZero = firstPaint ? 0 : undefined;
 
     Object.keys(nums).forEach(function (key) {
       var node = root.querySelector('[data-c4a-num="' + key + '"]');
-      if (node && typeof nums[key] === "number" && nums[key] > 0) countUp(node, nums[key]);
+      if (node && typeof nums[key] === "number" && nums[key] > 0) roll(node, nums[key], fromZero);
     });
+    firstPaint = false;
 
     if (el.areasSub) {
       el.areasSub.textContent = fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
@@ -249,13 +266,13 @@
         b.val.textContent = pct + "%";
         var w = Math.max(2, Math.min(100, Math.round((n / max) * 100))) + "%";
         if (reduce) b.fill.style.width = w;
-        else setTimeout(function () { b.fill.style.width = w; }, 260 + i * 90);
+        else setTimeout(function () { b.fill.style.width = w; }, 420 + i * 130);
       });
     }
 
     if (el.updated && d.at) {
       try {
-        el.updated.textContent = "Ενημέρωση " + new Date(d.at).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
+        el.updated.textContent = TXT.update + " " + new Date(d.at).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
       } catch (e) { /* */ }
     }
   }
@@ -268,7 +285,6 @@
     return null;
   }
 
-  /* --- μικρό queue με όριο ταυτόχρονων (να μην πνίξουμε το ArcGIS) --- */
   function runLimited(tasks, limit) {
     var results = [];
     var i = 0, active = 0, done = 0;
@@ -292,32 +308,34 @@
     });
   }
 
-  function postTotal(body) {
+  function withTimeout(promise, ms) {
     var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 12000);
-    return fetch(API + "/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign({ pageSize: 1 }, body || {})),
-      signal: ctrl.signal
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        clearTimeout(timer);
-        if (d && d.success && typeof d.total === "number") return d.total;
-        throw new Error("bad");
-      });
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    return promise(ctrl.signal).finally(function () { clearTimeout(timer); });
+  }
+
+  function postTotal(body) {
+    return withTimeout(function (signal) {
+      return fetch(API + "/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign({ pageSize: 1 }, body || {})),
+        signal: signal
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d && d.success && typeof d.total === "number") return d.total;
+          throw new Error("bad");
+        });
+    }, 12000);
   }
 
   function getValues(level) {
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 12000);
-    return fetch(API + "/locations?level=" + level, { signal: ctrl.signal })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        clearTimeout(timer);
-        return (d && d.values) || [];
-      });
+    return withTimeout(function (signal) {
+      return fetch(API + "/locations?level=" + level, { signal: signal })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { return (d && d.values) || []; });
+    }, 12000);
   }
 
   function strip(s) {
@@ -334,7 +352,6 @@
     return n;
   }
 
-  /* --- Φόρτωση φρέσκων δεδομένων --- */
   function refresh() {
     var tasks = [
       function () { return postTotal({}); },
@@ -344,54 +361,48 @@
     ];
 
     FEATURES.forEach(function (f) {
-      tasks.push(function () {
-        return postTotal({ accessibility: [f.id] });
-      });
+      tasks.push(function () { return postTotal({ accessibility: [f.id] }); });
     });
 
     return runLimited(tasks, 4).then(function (res) {
       var total = res[0];
-      var areas = Array.isArray(res[1]) ? uniqCount(res[1]) : null;
-      var dimoi = Array.isArray(res[2]) ? uniqCount(res[2]) : null;
-      var perif = Array.isArray(res[3]) ? res[3].length : null;
-      var counts = {};
-      var okCounts = 0;
-
-      FEATURES.forEach(function (f, i) {
-        var v = res[4 + i];
-        if (typeof v === "number") { counts[f.id] = v; okCounts++; }
-      });
-
       if (typeof total !== "number") throw new Error("total missing");
 
       var data = {
         total: total,
-        areas: areas || DEFAULT_DATA.areas,
-        dimoi: dimoi || DEFAULT_DATA.dimoi,
-        periferies: perif || DEFAULT_DATA.periferies,
-        counts: Object.assign({}, DEFAULT_DATA.counts, counts),
+        areas: Array.isArray(res[1]) ? uniqCount(res[1]) : DEFAULT_DATA.areas,
+        dimoi: Array.isArray(res[2]) ? uniqCount(res[2]) : DEFAULT_DATA.dimoi,
+        periferies: Array.isArray(res[3]) ? res[3].length : DEFAULT_DATA.periferies,
+        counts: Object.assign({}, DEFAULT_DATA.counts),
         at: Date.now(),
-        partial: okCounts < FEATURES.length
+        partial: false
       };
 
+      var ok = 0;
+      FEATURES.forEach(function (f, i) {
+        var v = res[4 + i];
+        if (typeof v === "number") { data.counts[f.id] = v; ok++; }
+      });
+      data.partial = ok < FEATURES.length;
+
       paint(data);
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* γεμάτο */ }
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* */ }
 
       if (el.dot) el.dot.className = data.partial ? "c4a-dot is-off" : "c4a-dot";
-      if (el.status) el.status.textContent = data.partial ? "Μερικά δεδομένα" : "Ζωντανά δεδομένα";
+      if (el.status) el.status.textContent = data.partial ? TXT.partial : TXT.live;
       return data;
     });
   }
 
-  /* 1) Άμεση εμφάνιση: cache ή προεπιλογές */
+  /* 1) Άμεση εμφάνιση: cache ή προεπιλογές — με «γύρισμα» από το 0 */
   var cached = readCache();
   paint(cached && (Date.now() - cached.at) < TTL ? cached : Object.assign({}, DEFAULT_DATA, { at: 0 }));
 
-  /* 2) Φρέσκα δεδομένα στο παρασκήνιο */
+  /* 2) Φρέσκα δεδομένα */
   refresh().catch(function () {
     if (el.dot) el.dot.className = "c4a-dot is-off";
-    if (el.status) el.status.textContent = "Τελευταία ενημέρωση";
-    if (el.updated) el.updated.textContent = "προσωρινά offline";
+    if (el.status) el.status.textContent = TXT.stale;
+    if (el.updated) el.updated.textContent = TXT.offline;
   });
 })();
 </script>
