@@ -1,0 +1,397 @@
+<!-- ============================================================
+     City4All — Ζωντανά στατιστικά (compact)
+     ΔΕΝ χρειάζεται καμία αλλαγή στον worker.
+     Χρησιμοποιεί τα ΥΠΑΡΧΟΝΤΑ endpoints: POST /search + GET /locations
+     (14 μικρά αιτήματα, ~1.6-3KB το καθένα, cache 24h στο browser).
+     Επικόλλησέ το ως ένα block.
+     ============================================================ -->
+
+<style>
+  .c4a-stats{
+    --c4a-blue:#27A6F5;
+    --c4a-green:#4ADE80;
+    --c4a-mint:#86C99E;
+    --c4a-text:#F1F5F9;
+    --c4a-dim:rgba(241,245,249,.62);
+    --c4a-line:rgba(255,255,255,.10);
+    --c4a-surface:rgba(255,255,255,.035);
+
+    box-sizing:border-box;
+    width:100%;
+    max-width:980px;
+    margin:0 auto;
+    padding:16px 22px 14px;
+    border:1px solid var(--c4a-line);
+    border-radius:18px;
+    background:
+      radial-gradient(600px 200px at 0% 0%, rgba(39,166,245,.10), rgba(39,166,245,0) 65%),
+      radial-gradient(520px 200px at 100% 0%, rgba(74,222,128,.07), rgba(74,222,128,0) 65%),
+      var(--c4a-surface);
+    font-family:'Montserrat','Segoe UI',Roboto,sans-serif;
+    color:var(--c4a-text);
+    -webkit-font-smoothing:antialiased;
+  }
+  .c4a-stats *{box-sizing:border-box}
+
+  .c4a-top{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-bottom:14px;
+  }
+  .c4a-live{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:10.5px; font-weight:700; letter-spacing:1.1px;
+    text-transform:uppercase; color:var(--c4a-dim);
+  }
+  .c4a-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--c4a-green); flex:0 0 auto;
+    box-shadow:0 0 0 3px rgba(74,222,128,.16);
+    animation:c4aPulse 2.6s ease-in-out infinite;
+  }
+  .c4a-dot.is-off{ background:#64748B; box-shadow:0 0 0 3px rgba(100,116,139,.16); animation:none }
+  @keyframes c4aPulse{
+    0%,100%{ box-shadow:0 0 0 3px rgba(74,222,128,.16) }
+    50%{ box-shadow:0 0 0 6px rgba(74,222,128,.06) }
+  }
+  .c4a-top-note{ font-size:10.5px; color:var(--c4a-dim); letter-spacing:.3px }
+
+  .c4a-grid{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)) }
+  .c4a-item{ padding:2px 14px; border-left:1px solid var(--c4a-line); min-width:0 }
+  .c4a-item:first-child{ border-left:0; padding-left:0 }
+  .c4a-num{
+    display:block;
+    font-size:clamp(1.45rem, 3.2vw, 2.05rem);
+    font-weight:800; line-height:1.05; letter-spacing:-.5px;
+    color:var(--c4a-blue);
+    font-variant-numeric:tabular-nums;
+  }
+  .c4a-item:nth-child(2) .c4a-num{ color:#5CB8F8 }
+  .c4a-item:nth-child(3) .c4a-num{ color:var(--c4a-mint) }
+  .c4a-item:nth-child(4) .c4a-num{ color:var(--c4a-green) }
+  .c4a-lbl{
+    display:block; margin-top:4px;
+    font-size:11px; font-weight:600; letter-spacing:.5px;
+    text-transform:uppercase; color:var(--c4a-dim);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .c4a-sub{
+    display:block; margin-top:2px; font-size:10.5px;
+    color:rgba(241,245,249,.42); white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+
+  .c4a-bars{
+    display:grid; gap:6px;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    margin-top:13px; padding-top:12px;
+    border-top:1px solid var(--c4a-line);
+  }
+  .c4a-bar-row{ min-width:0 }
+  .c4a-bar-head{
+    display:flex; justify-content:space-between; gap:8px;
+    font-size:10.5px; margin-bottom:5px; color:var(--c4a-dim);
+  }
+  .c4a-bar-head span:first-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .c4a-bar-head b{ color:var(--c4a-text); font-weight:700; font-variant-numeric:tabular-nums }
+  .c4a-track{ height:5px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.09) }
+  .c4a-fill{
+    height:100%; width:0; border-radius:999px;
+    background:linear-gradient(90deg,var(--c4a-blue),var(--c4a-green));
+    transition:width 1s cubic-bezier(.22,.8,.25,1);
+  }
+
+  @media (max-width:640px){
+    .c4a-stats{ padding:15px 16px 14px; border-radius:16px }
+    .c4a-grid{ grid-template-columns:1fr 1fr; gap:14px 0 }
+    .c4a-item{ padding:0 12px }
+    .c4a-item:nth-child(3){ border-left:0; padding-left:0 }
+    .c4a-item:nth-child(odd){ padding-left:0 }
+    .c4a-bars{ grid-template-columns:1fr; gap:8px; margin-top:13px }
+    .c4a-bar-row:nth-child(n+2){ display:none }
+    .c4a-top{ margin-bottom:12px }
+    .c4a-top-note{ display:none }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .c4a-dot{ animation:none }
+    .c4a-fill{ transition:none }
+  }
+</style>
+
+<section class="c4a-stats" id="c4aStats" role="group" aria-label="Στατιστικά δεδομένων City4All">
+  <div class="c4a-top">
+    <span class="c4a-live"><span class="c4a-dot" id="c4aDot" aria-hidden="true"></span><span id="c4aStatus">Ζωντανά δεδομένα</span></span>
+    <span class="c4a-top-note" id="c4aUpdated">Ενημέρωση…</span>
+  </div>
+
+  <div class="c4a-grid">
+    <div class="c4a-item">
+      <span class="c4a-num" data-c4a-num="total">951</span>
+      <span class="c4a-lbl">Σημεία</span>
+      <span class="c4a-sub">καταγεγραμμένα</span>
+    </div>
+    <div class="c4a-item">
+      <span class="c4a-num" data-c4a-num="areas">207</span>
+      <span class="c4a-lbl">Περιοχές</span>
+      <span class="c4a-sub" id="c4aAreasSub">δήμοι · περιφέρειες</span>
+    </div>
+    <div class="c4a-item">
+      <span class="c4a-num" data-c4a-num="accessRecords">1.885</span>
+      <span class="c4a-lbl">Καταγραφές</span>
+      <span class="c4a-sub">μέσων πρόσβασης</span>
+    </div>
+    <div class="c4a-item">
+      <span class="c4a-num" data-c4a-num="wc">171</span>
+      <span class="c4a-lbl">Τουαλέτες ΑμεΑ</span>
+      <span class="c4a-sub">η μεγαλύτερη έλλειψη</span>
+    </div>
+  </div>
+
+  <div class="c4a-bars" id="c4aBars"></div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+  var API = "https://city4allfinalai.ilias-pap-net.workers.dev";
+  var KEY = "c4a_stats_v2";
+  var TTL = 24 * 60 * 60 * 1000; // 24 ώρες
+  var root = document.getElementById("c4aStats");
+  if (!root) return;
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var el = {
+    dot: document.getElementById("c4aDot"),
+    status: document.getElementById("c4aStatus"),
+    updated: document.getElementById("c4aUpdated"),
+    areasSub: document.getElementById("c4aAreasSub"),
+    bars: document.getElementById("c4aBars")
+  };
+
+  /* Τα 10 μέσα — ids όπως τα επιστρέφει το /fields */
+  var FEATURES = [
+    { id: "ramp", label: "Ράμπα" },
+    { id: "stepfree", label: "Είσοδος χωρίς σκαλοπάτια" },
+    { id: "parking", label: "Χώρος στάθμευσης ΑμεΑ" },
+    { id: "wc", label: "Τουαλέτα ΑΜΕΑ" },
+    { id: "elevator", label: "Ανελκυστήρας/Αναβατόριο" },
+    { id: "signage", label: "Ειδική σήμανση για ΑμεΑ" },
+    { id: "autodoor", label: "Αυτόματη πόρτα" },
+    { id: "handrail", label: "Μπάρες/κουπαστές" },
+    { id: "tactile", label: "Οδηγός όδευσης τυφλών" },
+    { id: "doorbutton", label: "Κουμπί εισόδου" }
+  ];
+
+  /* Τελευταία γνωστά (χρησιμοποιούνται μέχρι να έρθουν φρέσκα) */
+  var DEFAULT_DATA = {
+    total: 951, areas: 207, dimoi: 109, periferies: 13,
+    counts: { ramp: 707, stepfree: 328, parking: 285, wc: 171, elevator: 146, signage: 108, autodoor: 69, handrail: 48, tactile: 16, doorbutton: 7 },
+    at: 0
+  };
+
+  function fmt(n) { return Number(n || 0).toLocaleString("el-GR"); }
+
+  function countUp(node, to) {
+    var target = Number(to) || 0;
+    var from = parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0;
+    node.setAttribute("aria-label", fmt(target));
+    if (reduce || from === target) { node.textContent = fmt(target); return; }
+    var t0 = performance.now(), dur = 900;
+    (function tick(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(Math.round(from + (target - from) * e));
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  var barEls = null;
+  function buildBars() {
+    if (!el.bars || barEls) return;
+    el.bars.innerHTML = "";
+    barEls = FEATURES.slice(0, 3).map(function (f) {
+      var row = document.createElement("div"); row.className = "c4a-bar-row";
+      var head = document.createElement("div"); head.className = "c4a-bar-head";
+      var nm = document.createElement("span"); nm.textContent = f.label;
+      var vl = document.createElement("b"); vl.textContent = "—";
+      head.appendChild(nm); head.appendChild(vl);
+      var track = document.createElement("div"); track.className = "c4a-track";
+      var fill = document.createElement("div"); fill.className = "c4a-fill";
+      track.appendChild(fill);
+      row.appendChild(head); row.appendChild(track);
+      el.bars.appendChild(row);
+      return { val: vl, fill: fill };
+    });
+  }
+
+  function paint(d) {
+    var nums = { total: d.total, areas: d.areas, accessRecords: 0, wc: d.counts.wc };
+    var sum = 0;
+    for (var k in d.counts) sum += d.counts[k] || 0;
+    nums.accessRecords = sum;
+
+    Object.keys(nums).forEach(function (key) {
+      var node = root.querySelector('[data-c4a-num="' + key + '"]');
+      if (node && typeof nums[key] === "number" && nums[key] > 0) countUp(node, nums[key]);
+    });
+
+    if (el.areasSub) {
+      el.areasSub.textContent = fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
+    }
+
+    buildBars();
+    if (barEls) {
+      var max = Math.max(d.counts[FEATURES[0].id] || 1, 1);
+      barEls.forEach(function (b, i) {
+        var f = FEATURES[i];
+        var n = d.counts[f.id] || 0;
+        var pct = Math.round((n / Math.max(d.total, 1)) * 100);
+        b.val.textContent = pct + "%";
+        var w = Math.max(2, Math.min(100, Math.round((n / max) * 100))) + "%";
+        if (reduce) b.fill.style.width = w;
+        else setTimeout(function () { b.fill.style.width = w; }, 260 + i * 90);
+      });
+    }
+
+    if (el.updated && d.at) {
+      try {
+        el.updated.textContent = "Ενημέρωση " + new Date(d.at).toLocaleTimeString("el-GR", { hour: "2-digit", minute: "2-digit" });
+      } catch (e) { /* */ }
+    }
+  }
+
+  function readCache() {
+    try {
+      var c = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (c && c.counts && c.total) return c;
+    } catch (e) { /* */ }
+    return null;
+  }
+
+  /* --- μικρό queue με όριο ταυτόχρονων (να μην πνίξουμε το ArcGIS) --- */
+  function runLimited(tasks, limit) {
+    var results = [];
+    var i = 0, active = 0, done = 0;
+    return new Promise(function (resolve) {
+      if (!tasks.length) return resolve(results);
+      function next() {
+        while (active < limit && i < tasks.length) {
+          (function (idx) {
+            active++;
+            tasks[idx]().then(function (v) { results[idx] = v; })
+              .catch(function () { results[idx] = null; })
+              .then(function () {
+                active--; done++;
+                if (done === tasks.length) resolve(results);
+                else next();
+              });
+          })(i++);
+        }
+      }
+      next();
+    });
+  }
+
+  function postTotal(body) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 12000);
+    return fetch(API + "/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ pageSize: 1 }, body || {})),
+      signal: ctrl.signal
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        clearTimeout(timer);
+        if (d && d.success && typeof d.total === "number") return d.total;
+        throw new Error("bad");
+      });
+  }
+
+  function getValues(level) {
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 12000);
+    return fetch(API + "/locations?level=" + level, { signal: ctrl.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        clearTimeout(timer);
+        return (d && d.values) || [];
+      });
+  }
+
+  function strip(s) {
+    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  function uniqCount(list) {
+    var seen = Object.create(null), n = 0;
+    for (var i = 0; i < list.length; i++) {
+      var k = strip(list[i]);
+      if (!k) continue;
+      if (!seen[k]) { seen[k] = 1; n++; }
+    }
+    return n;
+  }
+
+  /* --- Φόρτωση φρέσκων δεδομένων --- */
+  function refresh() {
+    var tasks = [
+      function () { return postTotal({}); },
+      function () { return getValues("area"); },
+      function () { return getValues("dimos"); },
+      function () { return getValues("perifereia"); }
+    ];
+
+    FEATURES.forEach(function (f) {
+      tasks.push(function () {
+        return postTotal({ accessibility: [f.id] });
+      });
+    });
+
+    return runLimited(tasks, 4).then(function (res) {
+      var total = res[0];
+      var areas = Array.isArray(res[1]) ? uniqCount(res[1]) : null;
+      var dimoi = Array.isArray(res[2]) ? uniqCount(res[2]) : null;
+      var perif = Array.isArray(res[3]) ? res[3].length : null;
+      var counts = {};
+      var okCounts = 0;
+
+      FEATURES.forEach(function (f, i) {
+        var v = res[4 + i];
+        if (typeof v === "number") { counts[f.id] = v; okCounts++; }
+      });
+
+      if (typeof total !== "number") throw new Error("total missing");
+
+      var data = {
+        total: total,
+        areas: areas || DEFAULT_DATA.areas,
+        dimoi: dimoi || DEFAULT_DATA.dimoi,
+        periferies: perif || DEFAULT_DATA.periferies,
+        counts: Object.assign({}, DEFAULT_DATA.counts, counts),
+        at: Date.now(),
+        partial: okCounts < FEATURES.length
+      };
+
+      paint(data);
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* γεμάτο */ }
+
+      if (el.dot) el.dot.className = data.partial ? "c4a-dot is-off" : "c4a-dot";
+      if (el.status) el.status.textContent = data.partial ? "Μερικά δεδομένα" : "Ζωντανά δεδομένα";
+      return data;
+    });
+  }
+
+  /* 1) Άμεση εμφάνιση: cache ή προεπιλογές */
+  var cached = readCache();
+  paint(cached && (Date.now() - cached.at) < TTL ? cached : Object.assign({}, DEFAULT_DATA, { at: 0 }));
+
+  /* 2) Φρέσκα δεδομένα στο παρασκήνιο */
+  refresh().catch(function () {
+    if (el.dot) el.dot.className = "c4a-dot is-off";
+    if (el.status) el.status.textContent = "Τελευταία ενημέρωση";
+    if (el.updated) el.updated.textContent = "προσωρινά offline";
+  });
+})();
+</script>
