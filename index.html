@@ -1,294 +1,257 @@
-
 <!-- ============================================================
-     City4All — Ζωντανά στατιστικά
-     Styling εναρμονισμένο με την υπόλοιπη ιστοσελίδα.
-     Διατηρούνται τα υπάρχοντα endpoints και η λειτουργία.
+     City4All — Στατιστικά σε πραγματικό χρόνο
+     ΙΔΙΟ ΣΤΥΛ με την ενότητα .city4all-agent:
+       · eyebrow με γραμμή 28px (#15803d)
+       · τυπογραφία Segoe UI / Roboto
+       · accent πράσινο #86c99e
+       · διαχωριστικό rgba(203,220,232,.18)
+       · note με τονισμένη φράση
+     ΔΕΝ χρειάζεται καμία αλλαγή στον worker (χρήση υπαρχόντων endpoints).
+     Κεφαλαία ΧΩΡΙΣ τόνους (ελληνική τυπογραφία).
      ============================================================ -->
 
 <style>
-  .c4a-stats {
-    --c4a-blue: #0079c1;
-    --c4a-green: #247647;
-    --c4a-mint: #86c99e;
-    --c4a-text: #172b3a;
-    --c4a-dim: #5c6c75;
-    --c4a-line: #e0e9e3;
-
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    color: var(--c4a-text);
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .c4a-stats * {
+  .city4all-stats {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    max-width: 850px;
+    margin: 40px 0;
+    padding: 8px 0;
+    color: #dbe5ef;
     box-sizing: border-box;
   }
+  .city4all-stats * { box-sizing: border-box; }
 
-  /* Κεφαλίδα */
-
-  .c4a-stats .c4a-top {
+  .city4all-stats .stats-eyebrow {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
+    color: #86b99a;
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
-
-  .c4a-stats .c4a-live {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    color: var(--c4a-dim);
-    letter-spacing: 0.7px;
-  }
-
-  .c4a-stats .c4a-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--c4a-green);
+  .city4all-stats .stats-eyebrow::before {
+    content: "";
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: #15803d;
     flex: 0 0 auto;
-    box-shadow: 0 0 0 3px rgba(36, 118, 71, 0.12);
-    animation: c4aPulse 2.6s ease-in-out infinite;
   }
 
-  .c4a-stats .c4a-dot.is-off {
-    background: #8b989e;
-    box-shadow: 0 0 0 3px rgba(139, 152, 158, 0.12);
-    animation: none;
+  .city4all-stats .stats-title {
+    margin: 0 0 22px;
+    color: #ffffff;
+    font-size: clamp(1.55rem, 3vw, 2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
   }
 
-  @keyframes c4aPulse {
-    0%, 100% {
-      box-shadow: 0 0 0 3px rgba(36, 118, 71, 0.12);
-    }
-
-    50% {
-      box-shadow: 0 0 0 6px rgba(36, 118, 71, 0.04);
-    }
-  }
-
-  .c4a-stats .c4a-top-note {
-    color: var(--c4a-dim);
-    letter-spacing: 0.2px;
-  }
-
-  /* Στατιστικά */
-
-  .c4a-stats .c4a-grid {
+  /* ---------- οι τέσσερις μετρήσεις ---------- */
+  .city4all-stats .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: clamp(16px, 3vw, 34px);
+    gap: clamp(16px, 3vw, 32px);
   }
+  .city4all-stats .stat { min-width: 0; }
 
-  .c4a-stats .c4a-item {
-    min-width: 0;
-    padding: 0;
-  }
-
-  .c4a-stats .c4a-num {
+  .city4all-stats .stat-num {
     display: block;
-    color: var(--c4a-green);
-    line-height: 1.15;
-    letter-spacing: -0.5px;
+    color: #ffffff;
+    font-size: clamp(1.75rem, 3.6vw, 2.35rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -1.2px;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
   }
 
-  .c4a-stats .c4a-item:nth-child(2) .c4a-num {
-    color: var(--c4a-blue);
-  }
-
-  .c4a-stats .c4a-item:nth-child(3) .c4a-num {
-    color: var(--c4a-green);
-  }
-
-  .c4a-stats .c4a-item:nth-child(4) .c4a-num {
-    color: var(--c4a-text);
-  }
-
-  .c4a-stats .c4a-lbl {
+  .city4all-stats .stat-lbl {
     display: block;
-    margin-top: 8px;
-    color: var(--c4a-text);
-    letter-spacing: 0.65px;
-    overflow-wrap: anywhere;
+    margin-top: 9px;
+    color: #86b99a;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-
-  .c4a-stats .c4a-sub {
+  .city4all-stats .stat-sub {
     display: block;
     margin-top: 4px;
-    color: var(--c4a-dim);
-    overflow-wrap: anywhere;
+    color: #c6d5e1;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* Μίνι μπάρες */
-
-  .c4a-stats .c4a-bars {
+  /* ---------- μπάρες ---------- */
+  .city4all-stats .stats-bars {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(14px, 2vw, 24px);
-    margin-top: 28px;
-    padding-top: 18px;
-    border-top: 1px solid var(--c4a-line);
+    gap: clamp(14px, 2.6vw, 26px);
+    margin-top: 22px;
   }
-
-  .c4a-stats .c4a-bar-row {
-    min-width: 0;
-  }
-
-  .c4a-stats .c4a-bar-head {
+  .city4all-stats .bar { min-width: 0; }
+  .city4all-stats .bar-head {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
     gap: 8px;
-    margin-bottom: 8px;
-    color: var(--c4a-dim);
+    margin-bottom: 7px;
+    color: #c6d5e1;
+    font-size: 0.78rem;
   }
-
-  .c4a-stats .c4a-bar-head span:first-child {
-    min-width: 0;
+  .city4all-stats .bar-head span:first-child {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  .c4a-stats .c4a-bar-head b {
-    flex: 0 0 auto;
-    color: var(--c4a-text);
+  .city4all-stats .bar-head b {
+    color: #ffffff;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
-
-  .c4a-stats .c4a-track {
-    height: 5px;
-    border-radius: 999px;
+  .city4all-stats .bar-track {
+    height: 3px;
+    border-radius: 2px;
     overflow: hidden;
-    background: #e8eee9;
+    background: rgba(203, 220, 232, 0.16);
   }
-
-  .c4a-stats .c4a-fill {
+  .city4all-stats .bar-fill {
     height: 100%;
     width: 0;
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      var(--c4a-green),
-      var(--c4a-mint)
-    );
+    border-radius: 2px;
+    background: linear-gradient(90deg, #15803d, #86c99e);
     transition: width 1.15s cubic-bezier(.22, .8, .25, 1);
   }
 
-  /* Κινητά */
+  /* ---------- διαχωριστικό & note ---------- */
+  .city4all-stats .stats-divider {
+    width: 100%;
+    height: 1px;
+    margin: 24px 0 18px;
+    background: rgba(203, 220, 232, 0.18);
+  }
 
-  @media (max-width: 640px) {
-    .c4a-stats .c4a-top {
-      margin-bottom: 20px;
-    }
+  .city4all-stats .stats-note {
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.94rem;
+    line-height: 1.8;
+  }
+  .city4all-stats .stats-note span { color: #86c99e; }
 
-    .c4a-stats .c4a-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 24px 18px;
-    }
+  .city4all-stats .stats-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    color: #86b99a;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 1.6px;
+  }
+  .city4all-stats .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #86c99e;
+    box-shadow: 0 0 0 3px rgba(134, 201, 158, 0.14);
+    animation: c4aPulse 2.8s ease-in-out infinite;
+    flex: 0 0 auto;
+  }
+  .city4all-stats .live-dot.is-off {
+    background: #7b8b9c;
+    box-shadow: 0 0 0 3px rgba(123, 139, 156, 0.14);
+    animation: none;
+  }
+  @keyframes c4aPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(134, 201, 158, 0.14); }
+    50%      { box-shadow: 0 0 0 6px rgba(134, 201, 158, 0.05); }
+  }
 
-    .c4a-stats .c4a-bars {
-      grid-template-columns: 1fr;
-      gap: 14px;
-      margin-top: 24px;
-      padding-top: 16px;
-    }
-
-    .c4a-stats .c4a-bar-row:nth-child(n+2) {
-      display: none;
-    }
-
-    .c4a-stats .c4a-top-note {
-      display: none;
-    }
+  @media (max-width: 600px) {
+    .city4all-stats { margin: 28px 0; }
+    .city4all-stats .stats-title { letter-spacing: -0.5px; margin-bottom: 18px; }
+    .city4all-stats .stats-grid { grid-template-columns: 1fr 1fr; gap: 20px 18px; }
+    .city4all-stats .stats-bars { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+    .city4all-stats .bar:nth-child(n+2) { display: none; }
+    .city4all-stats .stat-lbl { letter-spacing: 1.2px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .c4a-stats .c4a-dot {
-      animation: none;
-    }
-
-    .c4a-stats .c4a-fill {
-      transition: none;
-    }
+    .city4all-stats .live-dot { animation: none; }
+    .city4all-stats .bar-fill { transition: none; }
   }
 </style>
 
-<section class="c4a-stats" id="c4aStats" role="group" aria-label="Στατιστικά δεδομένων City4All">
-  <div class="c4a-top">
-    <span class="c4a-live">
-      <span class="c4a-dot" id="c4aDot" aria-hidden="true"></span>
-      <span id="c4aStatus">ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ</span>
-    </span>
-    <span class="c4a-top-note" id="c4aUpdated">Ενημέρωση…</span>
+<section class="city4all-stats" id="c4aStats" role="group" aria-label="Στατιστικά δεδομένων City4All">
+  <div class="stats-eyebrow">
+    Δεδομένα σε πραγματικό χρόνο
+    <span class="stats-live"><span class="live-dot" id="c4aDot" aria-hidden="true"></span><span id="c4aStatus">ΕΝΕΡΓΑ</span></span>
   </div>
 
-  <div class="c4a-grid">
-    <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="total">0</span>
-      <span class="c4a-lbl">ΣΗΜΕΙΑ</span>
-      <span class="c4a-sub">καταγεγραμμένα</span>
-    </div>
+  <h2 class="stats-title">Τι έχει καταγραφεί</h2>
 
-    <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="areas">0</span>
-      <span class="c4a-lbl">ΠΕΡΙΟΧΕΣ</span>
-      <span class="c4a-sub" id="c4aAreasSub">δήμοι · περιφέρειες</span>
+  <div class="stats-grid">
+    <div class="stat">
+      <span class="stat-num" data-c4a-num="total">0</span>
+      <span class="stat-lbl">ΣΗΜΕΙΑ</span>
+      <span class="stat-sub">καταγεγραμμένα</span>
     </div>
-
-    <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="accessRecords">0</span>
-      <span class="c4a-lbl">ΚΑΤΑΓΡΑΦΕΣ</span>
-      <span class="c4a-sub">μέσων πρόσβασης</span>
+    <div class="stat">
+      <span class="stat-num" data-c4a-num="areas">0</span>
+      <span class="stat-lbl">ΠΕΡΙΟΧΕΣ</span>
+      <span class="stat-sub" id="c4aAreasSub">δήμοι · περιφέρειες</span>
     </div>
-
-    <div class="c4a-item">
-      <span class="c4a-num" data-c4a-num="wc">0</span>
-      <span class="c4a-lbl">ΤΟΥΑΛΕΤΕΣ ΑΜΕΑ</span>
-      <span class="c4a-sub">η μεγαλύτερη έλλειψη</span>
+    <div class="stat">
+      <span class="stat-num" data-c4a-num="accessRecords">0</span>
+      <span class="stat-lbl">ΚΑΤΑΓΡΑΦΕΣ</span>
+      <span class="stat-sub">μέσων πρόσβασης</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" data-c4a-num="wc">0</span>
+      <span class="stat-lbl">ΤΟΥΑΛΕΤΕΣ ΑΜΕΑ</span>
+      <span class="stat-sub">η μεγαλύτερη έλλειψη</span>
     </div>
   </div>
 
-  <div class="c4a-bars" id="c4aBars"></div>
+  <div class="stats-bars" id="c4aBars"></div>
+
+  <div class="stats-divider"></div>
+
+  <p class="stats-note">
+    Ενημερώνεται αυτόματα από την καταγραφή.
+    <span>Χωρίς εκτιμήσεις — μόνο ό,τι έχει δηλωθεί.</span>
+  </p>
 </section>
 
 <script>
 (function () {
   "use strict";
-
   var API = "https://city4allfinalai.ilias-pap-net.workers.dev";
-  var KEY = "c4a_stats_v3";
+  var KEY = "c4a_stats_v4";
   var TTL = 24 * 60 * 60 * 1000;
 
   var root = document.getElementById("c4aStats");
   if (!root) return;
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
   var el = {
     dot: document.getElementById("c4aDot"),
     status: document.getElementById("c4aStatus"),
-    updated: document.getElementById("c4aUpdated"),
     areasSub: document.getElementById("c4aAreasSub"),
     bars: document.getElementById("c4aBars")
   };
 
-  var TXT = {
-    live: "ΖΩΝΤΑΝΑ ΔΕΔΟΜΕΝΑ",
-    partial: "ΜΕΡΙΚΑ ΔΕΔΟΜΕΝΑ",
-    stale: "ΤΕΛΕΥΤΑΙΑ ΕΝΗΜΕΡΩΣΗ",
-    update: "ΕΝΗΜΕΡΩΣΗ",
-    offline: "ΠΡΟΣΩΡΙΝΑ OFFLINE"
-  };
+  /* Κεφαλαία ΧΩΡΙΣ τόνους */
+  var TXT = { live: "ΕΝΕΡΓΑ", partial: "ΜΕΡΙΚΑ", stale: "ΤΕΛΕΥΤΑΙΑ ΛΗΨΗ" };
 
   var FEATURES = [
     { id: "ramp", label: "Ράμπα" },
@@ -304,160 +267,73 @@
   ];
 
   var DEFAULT_DATA = {
-    total: 951,
-    areas: 206,
-    dimoi: 109,
-    periferies: 13,
-    counts: {
-      ramp: 707,
-      stepfree: 328,
-      parking: 285,
-      wc: 171,
-      elevator: 146,
-      signage: 108,
-      autodoor: 69,
-      handrail: 48,
-      tactile: 16,
-      doorbutton: 7
-    },
+    total: 951, areas: 206, dimoi: 109, periferies: 13,
+    counts: { ramp: 707, stepfree: 328, parking: 285, wc: 171, elevator: 146, signage: 108, autodoor: 69, handrail: 48, tactile: 16, doorbutton: 7 },
     at: 0
   };
 
-  function fmt(n) {
-    return Number(n || 0).toLocaleString("el-GR");
-  }
+  function fmt(n) { return Number(n || 0).toLocaleString("el-GR"); }
 
   function roll(node, to, from) {
     var target = Number(to) || 0;
-    var start = typeof from === "number"
-      ? from
-      : (parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0);
-
+    var start = typeof from === "number" ? from : (parseInt(String(node.textContent).replace(/[^\d]/g, ""), 10) || 0);
     node.setAttribute("aria-label", fmt(target));
-
-    if (reduce || start === target) {
-      node.textContent = fmt(target);
-      return;
-    }
-
-    var t0 = performance.now();
-    var dur = 1250;
-
+    if (reduce || start === target) { node.textContent = fmt(target); return; }
+    var t0 = performance.now(), dur = 1250;
     (function tick(now) {
       var p = Math.min(1, (now - t0) / dur);
       var e = 1 - Math.pow(1 - p, 3);
-
       node.textContent = fmt(Math.round(start + (target - start) * e));
-
       if (p < 1) requestAnimationFrame(tick);
     })(t0);
   }
 
   var barEls = null;
-
   function buildBars() {
     if (!el.bars || barEls) return;
-
     el.bars.innerHTML = "";
-
     barEls = FEATURES.slice(0, 3).map(function (f) {
-      var row = document.createElement("div");
-      row.className = "c4a-bar-row";
-
-      var head = document.createElement("div");
-      head.className = "c4a-bar-head";
-
-      var nm = document.createElement("span");
-      nm.textContent = f.label;
-
-      var vl = document.createElement("b");
-      vl.textContent = "—";
-
-      head.appendChild(nm);
-      head.appendChild(vl);
-
-      var track = document.createElement("div");
-      track.className = "c4a-track";
-
-      var fill = document.createElement("div");
-      fill.className = "c4a-fill";
-
+      var row = document.createElement("div"); row.className = "bar";
+      var head = document.createElement("div"); head.className = "bar-head";
+      var nm = document.createElement("span"); nm.textContent = f.label;
+      var vl = document.createElement("b"); vl.textContent = "—";
+      head.appendChild(nm); head.appendChild(vl);
+      var track = document.createElement("div"); track.className = "bar-track";
+      var fill = document.createElement("div"); fill.className = "bar-fill";
       track.appendChild(fill);
-      row.appendChild(head);
-      row.appendChild(track);
+      row.appendChild(head); row.appendChild(track);
       el.bars.appendChild(row);
-
       return { val: vl, fill: fill };
     });
   }
 
   var firstPaint = true;
-
   function paint(d) {
     var sum = 0;
+    for (var k in d.counts) sum += d.counts[k] || 0;
 
-    for (var k in d.counts) {
-      sum += d.counts[k] || 0;
-    }
-
-    var nums = {
-      total: d.total,
-      areas: d.areas,
-      accessRecords: sum,
-      wc: d.counts.wc
-    };
-
+    var nums = { total: d.total, areas: d.areas, accessRecords: sum, wc: d.counts.wc };
     var fromZero = firstPaint ? 0 : undefined;
 
     Object.keys(nums).forEach(function (key) {
       var node = root.querySelector('[data-c4a-num="' + key + '"]');
-
-      if (node && typeof nums[key] === "number" && nums[key] > 0) {
-        roll(node, nums[key], fromZero);
-      }
+      if (node && typeof nums[key] === "number" && nums[key] > 0) roll(node, nums[key], fromZero);
     });
-
     firstPaint = false;
 
-    if (el.areasSub) {
-      el.areasSub.textContent =
-        fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
-    }
+    if (el.areasSub) el.areasSub.textContent = fmt(d.dimoi) + " δήμοι · " + fmt(d.periferies) + " περιφέρειες";
 
     buildBars();
-
     if (barEls) {
       var max = Math.max(d.counts[FEATURES[0].id] || 1, 1);
-
       barEls.forEach(function (b, i) {
         var f = FEATURES[i];
         var n = d.counts[f.id] || 0;
-        var pct = Math.round((n / Math.max(d.total, 1)) * 100);
+        b.val.textContent = Math.round((n / Math.max(d.total, 1)) * 100) + "%";
         var w = Math.max(2, Math.min(100, Math.round((n / max) * 100))) + "%";
-
-        b.val.textContent = pct + "%";
-
-        if (reduce) {
-          b.fill.style.width = w;
-        } else {
-          setTimeout(function () {
-            b.fill.style.width = w;
-          }, 420 + i * 130);
-        }
+        if (reduce) b.fill.style.width = w;
+        else setTimeout(function () { b.fill.style.width = w; }, 420 + i * 130);
       });
-    }
-
-    if (el.updated && d.at) {
-      try {
-        el.updated.textContent =
-          TXT.update + " " +
-          new Date(d.at).toLocaleTimeString("el-GR", {
-            hour: "2-digit",
-            minute: "2-digit"
-          });
-      } catch (e) {
-        /* */
-      }
     }
   }
 
@@ -465,58 +341,35 @@
     try {
       var c = JSON.parse(localStorage.getItem(KEY) || "null");
       if (c && c.counts && c.total) return c;
-    } catch (e) {
-      /* */
-    }
-
+    } catch (e) { /* */ }
     return null;
   }
 
   function runLimited(tasks, limit) {
-    var results = [];
-    var i = 0;
-    var active = 0;
-    var done = 0;
-
+    var results = [], i = 0, active = 0, done = 0;
     return new Promise(function (resolve) {
       if (!tasks.length) return resolve(results);
-
       function next() {
         while (active < limit && i < tasks.length) {
           (function (idx) {
             active++;
-
-            tasks[idx]()
-              .then(function (v) {
-                results[idx] = v;
-              })
-              .catch(function () {
-                results[idx] = null;
-              })
+            tasks[idx]().then(function (v) { results[idx] = v; })
+              .catch(function () { results[idx] = null; })
               .then(function () {
-                active--;
-                done++;
-
-                if (done === tasks.length) resolve(results);
-                else next();
+                active--; done++;
+                if (done === tasks.length) resolve(results); else next();
               });
           })(i++);
         }
       }
-
       next();
     });
   }
 
-  function withTimeout(promise, ms) {
+  function withTimeout(fn, ms) {
     var ctrl = new AbortController();
-    var timer = setTimeout(function () {
-      ctrl.abort();
-    }, ms);
-
-    return promise(ctrl.signal).finally(function () {
-      clearTimeout(timer);
-    });
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    return fn(ctrl.signal).finally(function () { clearTimeout(timer); });
   }
 
   function postTotal(body) {
@@ -527,14 +380,9 @@
         body: JSON.stringify(Object.assign({ pageSize: 1 }, body || {})),
         signal: signal
       })
-        .then(function (r) {
-          return r.json();
-        })
+        .then(function (r) { return r.json(); })
         .then(function (d) {
-          if (d && d.success && typeof d.total === "number") {
-            return d.total;
-          }
-
+          if (d && d.success && typeof d.total === "number") return d.total;
           throw new Error("bad");
         });
     }, 12000);
@@ -542,73 +390,39 @@
 
   function getValues(level) {
     return withTimeout(function (signal) {
-      return fetch(API + "/locations?level=" + level, {
-        signal: signal
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (d) {
-          return (d && d.values) || [];
-        });
+      return fetch(API + "/locations?level=" + level, { signal: signal })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { return (d && d.values) || []; });
     }, 12000);
   }
 
   function strip(s) {
-    return String(s || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
+    return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
   }
-
   function uniqCount(list) {
-    var seen = Object.create(null);
-    var n = 0;
-
+    var seen = Object.create(null), n = 0;
     for (var i = 0; i < list.length; i++) {
       var k = strip(list[i]);
-
       if (!k) continue;
-
-      if (!seen[k]) {
-        seen[k] = 1;
-        n++;
-      }
+      if (!seen[k]) { seen[k] = 1; n++; }
     }
-
     return n;
   }
 
   function refresh() {
     var tasks = [
-      function () {
-        return postTotal({});
-      },
-      function () {
-        return getValues("area");
-      },
-      function () {
-        return getValues("dimos");
-      },
-      function () {
-        return getValues("perifereia");
-      }
+      function () { return postTotal({}); },
+      function () { return getValues("area"); },
+      function () { return getValues("dimos"); },
+      function () { return getValues("perifereia"); }
     ];
-
     FEATURES.forEach(function (f) {
-      tasks.push(function () {
-        return postTotal({ accessibility: [f.id] });
-      });
+      tasks.push(function () { return postTotal({ accessibility: [f.id] }); });
     });
 
     return runLimited(tasks, 4).then(function (res) {
       var total = res[0];
-
-      if (typeof total !== "number") {
-        throw new Error("total missing");
-      }
+      if (typeof total !== "number") throw new Error("total missing");
 
       var data = {
         total: total,
@@ -621,62 +435,27 @@
       };
 
       var ok = 0;
-
       FEATURES.forEach(function (f, i) {
         var v = res[4 + i];
-
-        if (typeof v === "number") {
-          data.counts[f.id] = v;
-          ok++;
-        }
+        if (typeof v === "number") { data.counts[f.id] = v; ok++; }
       });
-
       data.partial = ok < FEATURES.length;
 
       paint(data);
+      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* */ }
 
-      try {
-        localStorage.setItem(KEY, JSON.stringify(data));
-      } catch (e) {
-        /* */
-      }
-
-      if (el.dot) {
-        el.dot.className = data.partial ? "c4a-dot is-off" : "c4a-dot";
-      }
-
-      if (el.status) {
-        el.status.textContent = data.partial ? TXT.partial : TXT.live;
-      }
-
+      if (el.dot) el.dot.className = data.partial ? "live-dot is-off" : "live-dot";
+      if (el.status) el.status.textContent = data.partial ? TXT.partial : TXT.live;
       return data;
     });
   }
 
-  /* Άμεση εμφάνιση από cache ή προεπιλεγμένα δεδομένα */
-
   var cached = readCache();
-
-  paint(
-    cached && (Date.now() - cached.at) < TTL
-      ? cached
-      : Object.assign({}, DEFAULT_DATA, { at: 0 })
-  );
-
-  /* Φόρτωση ενημερωμένων δεδομένων */
+  paint(cached && (Date.now() - cached.at) < TTL ? cached : Object.assign({}, DEFAULT_DATA, { at: 0 }));
 
   refresh().catch(function () {
-    if (el.dot) {
-      el.dot.className = "c4a-dot is-off";
-    }
-
-    if (el.status) {
-      el.status.textContent = TXT.stale;
-    }
-
-    if (el.updated) {
-      el.updated.textContent = TXT.offline;
-    }
+    if (el.dot) el.dot.className = "live-dot is-off";
+    if (el.status) el.status.textContent = TXT.stale;
   });
 })();
 </script>
